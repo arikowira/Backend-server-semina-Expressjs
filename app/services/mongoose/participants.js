@@ -1,15 +1,15 @@
-const Participants = require("../../api/v1/participants/model");
-const Events = require("../../api/v1/events/model");
-const Orders = require("../../api/v1/orders/model");
-const Payments = require("../../api/v1/payments/model");
-const { createTokenParticipant, createJWT } = require("../../utils");
+const Participants = require('../../api/v1/participants/model');
+const Events = require('../../api/v1/events/model');
+const Orders = require('../../api/v1/orders/model');
+const Payments = require('../../api/v1/payments/model');
+const { createTokenParticipant, createJWT } = require('../../utils');
 const {
   BadRequestError,
   NotFoundError,
   UnauthorizedError,
-} = require("../../errors");
+} = require('../../errors');
 
-const { otpMail, orderMail } = require("../mail");
+const { otpMail, orderMail } = require('../mail');
 
 const signupParticipant = async (req) => {
   const { firstName, lastName, email, password, role } = req.body;
@@ -17,7 +17,7 @@ const signupParticipant = async (req) => {
   //jika email dan status tidak aktif
   let result = await Participants.findOne({
     email,
-    status: "tidak aktif",
+    status: 'tidak aktif',
   });
 
   if (result) {
@@ -50,14 +50,14 @@ const activateParticipant = async (req) => {
     email,
   });
 
-  if (!check) throw new NotFoundError("Participant belum terdaftar");
+  if (!check) throw new NotFoundError('Participant belum terdaftar');
 
-  if (check && check.otp !== otp) throw new BadRequestError("Kode otp salah");
+  if (check && check.otp !== otp) throw new BadRequestError('Kode otp salah');
 
   const result = await Participants.findByIdAndUpdate(
     check._id,
     {
-      status: "aktif",
+      status: 'aktif',
     },
     { new: true }
   );
@@ -71,23 +71,23 @@ const signinParticipant = async (req) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new BadRequestError("Please provide email and password");
+    throw new BadRequestError('Please provide email and password');
   }
 
   const result = await Participants.findOne({ email: email });
 
   if (!result) {
-    throw new UnauthorizedError("Invalid Credentials");
+    throw new UnauthorizedError('Invalid Credentials');
   }
 
-  if (result.status === "tidak aktif") {
-    throw new UnauthorizedError("Akun anda belum aktif");
+  if (result.status === 'tidak aktif') {
+    throw new UnauthorizedError('Akun anda belum aktif');
   }
 
   const isPasswordCorrect = await result.comparePassword(password);
 
   if (!isPasswordCorrect) {
-    throw new UnauthorizedError("Invalid Credetials");
+    throw new UnauthorizedError('Invalid Credentials');
   }
 
   const token = createJWT({
@@ -98,10 +98,10 @@ const signinParticipant = async (req) => {
 };
 
 const getAllEvents = async (req) => {
-  const result = await Events.find({ statusEvent: "Published" })
-    .populate("category")
-    .populate("image")
-    .select("_id title date tickets venueName");
+  const result = await Events.find({ statusEvent: 'Published' })
+    .populate('category')
+    .populate('image')
+    .select('_id title date tickets venueName');
 
   return result;
 };
@@ -109,9 +109,9 @@ const getAllEvents = async (req) => {
 const getOneEvent = async (req) => {
   const { id } = req.params;
   const result = await Events.findOne({ _id: id })
-    .populate("category")
-    .populate("talent")
-    .populate("image");
+    .populate('category')
+    .populate('talent')
+    .populate('image');
 
   if (!result) throw new NotFoundError(`Tidak ada acara dengan id : ${id}`);
 
@@ -131,12 +131,12 @@ const checkoutOrder = async (req) => {
 
   const checkingEvent = await Events.findOne({ _id: event });
   if (!checkingEvent) {
-    throw new NotFoundError("Tidak ada acara dengan id :" + event);
+    throw new NotFoundError('Tidak ada acara dengan id :' + event);
   }
 
   const checkingPayment = await Payments.findOne({ _id: payment });
   if (!checkingPayment) {
-    throw new NotFoundError("Tidak ada acara dengan id :" + payment);
+    throw new NotFoundError('Tidak ada acara dengan id :' + payment);
   }
 
   let totalPay = 0,
@@ -146,7 +146,7 @@ const checkoutOrder = async (req) => {
     checkingEvent.tickets.forEach((ticket) => {
       if (tic.ticketCategories.type === ticket.type) {
         if (tic.sumTicket > ticket.stock) {
-          throw new NotFoundError("Stock event tidak mencukupi");
+          throw new NotFoundError('Stock event tidak mencukupi');
         } else {
           ticket.stock -= tic.sumTicket;
 
@@ -179,7 +179,7 @@ const checkoutOrder = async (req) => {
     totalOrderTicket,
     paymentType: checkingPayment.type,
     totalPay,
-  }
+  };
 
   const result = new Orders({
     date: new Date(),

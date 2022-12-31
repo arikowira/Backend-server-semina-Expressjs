@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const { model, Schema } = mongoose;
 
 let ticketCategoriesSchema = Schema({
   type: {
     type: String,
-    required: [true, "Tipe tike harus diisi"],
+    required: [true, 'Tipe tike harus diisi'],
   },
   price: {
     type: Number,
@@ -28,26 +28,30 @@ const EventSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "Judul harus diisi"],
+      required: [true, 'Judul harus diisi'],
     },
     date: {
       type: Date,
-      required: [true, "Tanggal dan waktu harus diisi"],
+      required: [true, 'Tanggal dan waktu harus diisi'],
     },
     about: {
       type: String,
     },
     tagLine: {
       type: String,
-      required: [true, "Tagline harus diisi"],
+      required: [true, 'Tagline harus diisi'],
     },
     keyPoint: {
       type: [String],
     },
+    venueName: {
+      type: String,
+      required: [true, 'Tempat acara harus diisi'],
+    },
     statusEvent: {
       type: String,
-      enum: ["Draft", "Published"],
-      default: "Draft",
+      enum: ['Draft', 'Published'],
+      default: 'Draft',
     },
     tickets: {
       type: [ticketCategoriesSchema],
@@ -55,22 +59,22 @@ const EventSchema = new mongoose.Schema(
     },
     image: {
       type: mongoose.Types.ObjectId,
-      ref: "Image",
+      ref: 'Image',
       required: true,
     },
     category: {
       type: mongoose.Types.ObjectId,
-      ref: "Category",
+      ref: 'Category',
       required: true,
     },
     talent: {
       type: mongoose.Types.ObjectId,
-      ref: "Talent",
+      ref: 'Talent',
       required: true,
     },
     organizer: {
       type: mongoose.Types.ObjectId,
-      ref: "Organizer",
+      ref: 'Organizer',
       required: true,
     },
   },
@@ -79,4 +83,4 @@ const EventSchema = new mongoose.Schema(
   }
 );
 
-module.exports = model('Event', EventSchema)
+module.exports = model('Event', EventSchema);

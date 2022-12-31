@@ -1,8 +1,8 @@
-const Events = require("../../api/v1/events/model");
-const { checkingImage } = require("./images");
-const { checkingCategories } = require("./categories");
-const { checkingTalents } = require("./talents");
-const { NotFoundError, BadRequestError } = require("../../errors");
+const Events = require('../../api/v1/events/model');
+const { checkingImage } = require('./images');
+const { checkingCategories } = require('./categories');
+const { checkingTalents } = require('./talents');
+const { NotFoundError, BadRequestError } = require('../../errors');
 
 const getAllEvents = async (req) => {
   const { keyword, category, talent, status } = req.query;
@@ -10,7 +10,7 @@ const getAllEvents = async (req) => {
   let condition = { organizer: req.user.organizer };
 
   if (keyword) {
-    condition = { ...condition, title: { $regex: keyword, $options: "i" } };
+    condition = { ...condition, title: { $regex: keyword, $options: 'i' } };
   }
 
   if (category) {
@@ -20,23 +20,23 @@ const getAllEvents = async (req) => {
   if (talent) {
     condition = { ...condition, talent: talent };
   }
-  if (["Draft", "Published"].includes(status)) {
+  if (['Draft', 'Published'].includes(status)) {
     condition = { ...condition, statusEvent: status };
   }
 
   const result = await Events.find(condition)
     .populate({
-      path: "image",
-      select: "_id name",
+      path: 'image',
+      select: '_id name',
     })
     .populate({
-      path: "category",
-      select: "_id name",
+      path: 'category',
+      select: '_id name',
     })
     .populate({
-      path: "talent",
-      select: "_id role name",
-      populate: { path: "image", select: "_id name" },
+      path: 'talent',
+      select: '_id role name',
+      populate: { path: 'image', select: '_id name' },
     });
   return result;
 };
@@ -62,7 +62,7 @@ const createEvents = async (req) => {
 
   const check = await Events.findOne({ title });
 
-  if (check) throw new BadRequestError("judul event sudah terdaftar");
+  if (check) throw new BadRequestError('judul event sudah terdaftar');
 
   const result = await Events.create({
     title,
@@ -89,15 +89,15 @@ const getOneEvents = async (req) => {
     _id: id,
     organizer: req.user.organizer,
   })
-    .populate({ path: "image", select: "_id name" })
+    .populate({ path: 'image', select: '_id name' })
     .populate({
-      path: "category",
-      select: "_id name",
+      path: 'category',
+      select: '_id name',
     })
     .populate({
-      path: "talent",
-      select: "_id name role image",
-      populate: { path: "image", select: "_id name" },
+      path: 'talent',
+      select: '_id name role image',
+      populate: { path: 'image', select: '_id name' },
     });
 
   if (!result) throw new NotFoundError(`Tidak ada event dengan id : ${id}`);
@@ -138,7 +138,7 @@ const updateEvents = async (req) => {
     _id: { $ne: id },
   });
 
-  if (check) throw new BadRequestError("Judul event sudah terdaftar");
+  if (check) throw new BadRequestError('Judul event sudah terdaftar');
 
   const result = await Events.findOneAndUpdate(
     { _id: id },
@@ -181,8 +181,8 @@ const changeStatusEvents = async (req) => {
   const { id } = req.params;
   const { statusEvent } = req.body;
 
-  if (!["Draft", "Published"].includes(statusEvent)) {
-    throw new BadRequestError("Status harus Draft atau Published");
+  if (!['Draft', 'Published'].includes(statusEvent)) {
+    throw new BadRequestError('Status harus Draft atau Published');
   }
 
   // cari event berdasarkan field id

@@ -1,8 +1,8 @@
-const Categories = require("../../api/v1/categories/model");
-const { BadRequestError, NotFoundError } = require("../../errors");
+const Categories = require('../../api/v1/categories/model');
+const { BadRequestError, NotFoundError } = require('../../errors');
 
 const getAllCategories = async (req) => {
-  console.log("req.user");
+  console.log('req.user');
   console.log(req.user);
 
   const result = await Categories.find({ organizer: req.user.organizer });
@@ -20,7 +20,7 @@ const createCategories = async (req) => {
   });
 
   //apa bila check true / data categories sudah ada maka tampilkan bad request error
-  if (check) throw new BadRequestError("Nama kategori duplikat");
+  if (check) throw new BadRequestError('Nama kategori duplikat');
 
   const result = await Categories.create({
     name,
@@ -50,10 +50,10 @@ const updateCategories = async (req) => {
   const check = await Categories.findOne({
     name,
     organizer: req.user.organizer,
-    _id: { $ne: Categoryid },
+    // _id: { $ne: Categoryid },
   });
 
-  if (check) throw new BadRequestError("Kategori nama duplikat");
+  if (check) throw new BadRequestError('Nama kategori duplikat');
 
   const result = await Categories.findOneAndUpdate(
     { _id: Categoryid },
