@@ -26,6 +26,7 @@ const fileFilter = (req, file, cb) => {
     );
   }
 };
+
 const uploadMiddleware = multer({
   storage,
   limits: {

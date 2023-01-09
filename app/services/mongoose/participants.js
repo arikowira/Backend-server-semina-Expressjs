@@ -2,19 +2,24 @@ const Participants = require('../../api/v1/participants/model');
 const Events = require('../../api/v1/events/model');
 const Orders = require('../../api/v1/orders/model');
 const Payments = require('../../api/v1/payments/model');
-const { createTokenParticipant, createJWT } = require('../../utils');
+const {
+  createTokenParticipant,
+  createJWT,
+  createImageFromInitials,
+} = require('../../utils');
 const {
   BadRequestError,
   NotFoundError,
   UnauthorizedError,
 } = require('../../errors');
-
 const { otpMail, orderMail } = require('../mail');
+const { checkingImage, createImages } = require('./images');
+const fs = require('fs');
 
 const signupParticipant = async (req) => {
   const { firstName, lastName, email, password, role } = req.body;
 
-  //jika email dan status tidak aktif
+  //jika email ada dan status=tidak aktif
   let result = await Participants.findOne({
     email,
     status: 'tidak aktif',
@@ -38,10 +43,25 @@ const signupParticipant = async (req) => {
       otp: Math.floor(Math.random() * 9999),
     });
   }
-  await otpMail(email, result);
+  const images = await createImages(result._id);
 
+  let data = await Participants.findByIdAndUpdate(
+    result._id,
+    {
+      image: images._id,
+    },
+    { new: true }
+  );
+
+  createImageFromInitials(
+    result._id,
+    200,
+    `${result.firstName} ${result.lastName}`
+  );
+
+  await otpMail(email, result);
   delete result._doc.password;
-  return result;
+  return data;
 };
 
 const activateParticipant = async (req) => {
@@ -97,6 +117,44 @@ const signinParticipant = async (req) => {
   return token;
 };
 
+const doUpdateParticipants = async (req) => {
+  const id = req.participant.id;
+  const { firstname, lastName, image, role } = req.body;
+
+  await checkingImage(image);
+
+  const result = await Participants.findOneAndUpdate(
+    { _id: id },
+    { firstname, lastName, image, role },
+    { new: true, runValidators: true }
+  );
+
+  if (!result)
+    throw new NotFoundError(`Tidak ada participant dengan id : ${id}`);
+
+  delete result._doc.password;
+
+  return result;
+};
+
+const profileParticipants = async (req) => {
+  const parcitipantId = req.participant.id;
+  console.log(req.participant);
+  const result = await Participants.findOne({ _id: parcitipantId })
+    .populate({
+      path: 'image',
+      select: '_id name',
+    })
+    .select('_id firstName lastName email role status image');
+
+  if (!result)
+    throw new NotFoundError(
+      `Tidak ada participant dengan id : ${parcitipantId}`
+    );
+
+  return result;
+};
+
 const getAllEvents = async (req) => {
   const result = await Events.find({ statusEvent: 'Published' })
     .populate('category')
@@ -110,7 +168,7 @@ const getOneEvent = async (req) => {
   const { id } = req.params;
   const result = await Events.findOne({ _id: id })
     .populate('category')
-    .populate('talent')
+    .populate({ path: 'talent', populate: 'image' })
     .populate('image');
 
   if (!result) throw new NotFoundError(`Tidak ada acara dengan id : ${id}`);
@@ -200,12 +258,26 @@ const checkoutOrder = async (req) => {
   return result;
 };
 
+const getAllPaymentByOrganizer = async (req) => {
+  const { organizer } = req.params;
+
+  const result = await Payments.find({ organizer: organizer }).populate({
+    path: 'image',
+    select: '_id name',
+  });
+
+  return result;
+};
+
 module.exports = {
   signupParticipant,
   signinParticipant,
   activateParticipant,
+  doUpdateParticipants,
+  profileParticipants,
   getAllOrders,
   getOneEvent,
   getAllEvents,
   checkoutOrder,
+  getAllPaymentByOrganizer,
 };

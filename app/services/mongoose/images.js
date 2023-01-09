@@ -1,5 +1,5 @@
-const Images = require("../../api/v1/images/model");
-const { NotFoundError, BadRequestError } = require("../../errors");
+const Images = require('../../api/v1/images/model');
+const { NotFoundError, BadRequestError } = require('../../errors');
 
 // cara generate url setelah submit baru kita simpen images
 const generateUrlImages = async (req) => {
@@ -11,9 +11,9 @@ const generateUrlImages = async (req) => {
 // cara pertama ini di bawah
 const createImages = async (req) => {
   const result = await Images.create({
-    name: req.file
+    name: req?.file
       ? `uploads/${req.file.filename}`
-      : `uploads/avatar/default.jpeg`,
+      : `uploads/avatar/${req}.png`,
   });
   return result;
 };
@@ -27,6 +27,5 @@ const checkingImage = async (id) => {
 
   return result;
 };
-
 
 module.exports = { createImages, generateUrlImages, checkingImage };

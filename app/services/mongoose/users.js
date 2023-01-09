@@ -1,13 +1,14 @@
-const Users = require("../../api/v1/users/model");
-const Organizers = require("../../api/v1/organizers/model");
-const { BadRequestError } = require("../../errors");
-const { StatusCodes } = require("http-status-codes");
+const Users = require('../../api/v1/users/model');
+const Participants = require('../../api/v1/participants/model');
+const Organizers = require('../../api/v1/organizers/model');
+const { BadRequestError, NotFoundError } = require('../../errors');
+const { StatusCodes } = require('http-status-codes');
 
-createOrganizers = async (req) => {
+const createOrganizers = async (req) => {
   const { organizer, role, email, password, confirmPassword, name } = req.body;
 
   if (password !== confirmPassword) {
-    throw new BadRequestError("Password dan konfirmasi password tidak cocok");
+    throw new BadRequestError('Password dan konfirmasi password tidak cocok');
   }
 
   const result = await Organizers.create({ organizer });
@@ -28,7 +29,7 @@ createOrganizers = async (req) => {
 const createUsers = async (req, res) => {
   const { name, password, role, confirmPassword, email } = req.body;
   if (password !== confirmPassword) {
-    throw new BadRequestError("Password dan konfirmasi password tidak cocok");
+    throw new BadRequestError('Password dan konfirmasi password tidak cocok');
   }
 
   const result = await Users.create({
@@ -47,4 +48,31 @@ const getAllUsers = async (req) => {
   return result;
 };
 
-module.exports = { createOrganizers, createUsers, getAllUsers };
+const getAllParticipants = async (req) => {
+  const result = await Participants.find();
+
+  return result;
+};
+
+const getOneParticipants = async (req) => {
+  const { id } = req.params;
+
+  const result = await Participants.findOne({ _id: id }).populate({
+    path: 'image',
+    select: '_id name',
+  });
+  // .select("_id name role image");
+
+  if (!result)
+    throw new NotFoundError(`Tidak ada participant dengan id : ${id}`);
+
+  return result;
+};
+
+module.exports = {
+  createOrganizers,
+  createUsers,
+  getAllUsers,
+  getAllParticipants,
+  getOneParticipants,
+};

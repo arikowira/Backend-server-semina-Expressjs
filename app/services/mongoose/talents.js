@@ -1,7 +1,6 @@
-const Talents = require("../../api/v1/talents/model");
-const { checkingImage } = require("./images");
-const { NotFoundError, BadRequestError } = require("../../errors");
-const { countDocuments } = require("../../api/v1/images/model");
+const Talents = require('../../api/v1/talents/model');
+const { checkingImage } = require('./images');
+const { NotFoundError, BadRequestError } = require('../../errors');
 
 const getAllTalents = async (req) => {
   const { keyword } = req.query;
@@ -9,17 +8,17 @@ const getAllTalents = async (req) => {
   let condition = { organizer: req.user.organizer };
 
   if (keyword) {
-    condition = { ...condition, name: { $regex: keyword, $options: "i" } };
+    condition = { ...condition, name: { $regex: keyword, $options: 'i' } };
   }
 
   const result = await Talents.find(condition)
     //jika ingin manggil semua object image
     // .populate('image')
     .populate({
-      path: "image",
-      select: "_id name",
+      path: 'image',
+      select: '_id name',
     })
-    .select("_id name role image");
+    .select('_id name role image');
   return result;
 };
 
@@ -30,7 +29,7 @@ const createTalents = async (req) => {
 
   const check = await Talents.findOne({ name, organizer: req.user.organizer });
 
-  if (check) throw new BadRequestError("pembicara sudah terdaftar");
+  if (check) throw new BadRequestError('pembicara sudah terdaftar');
 
   const result = await Talents.create({
     name,
@@ -47,10 +46,10 @@ const getOneTalents = async (req) => {
 
   const result = await Talents.findOne({ _id: id })
     .populate({
-      path: "image",
-      select: "_id name",
+      path: 'image',
+      select: '_id name',
     })
-    .select("_id name role image");
+    .select('_id name role image');
 
   if (!result) throw new NotFoundError(`Tidak ada pembicara dengan id : ${id}`);
 
@@ -69,11 +68,12 @@ const updateTalents = async (req) => {
     organizer: req.user.organizer,
   });
 
-  if (check) throw new BadRequestError("pembicara sudah terdaftar");
+  if (check) throw new BadRequestError('pembicara sudah terdaftar');
 
   const result = await Talents.findOneAndUpdate(
     { _id: id },
     { name, image, role, organizer: req.user.organizer },
+    //new untuk menampilkan result setelah di update dan runValidators untuk menjalankan validasi dari model mongoosenya
     { new: true, runValidators: true }
   );
 

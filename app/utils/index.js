@@ -8,6 +8,7 @@ const {
   createTokenUser,
   createTokenParticipant,
 } = require('./createTokenUser');
+const { createImageFromInitials } = require('./generateAvatar');
 
 module.exports = {
   createJWT,
@@ -16,4 +17,5 @@ module.exports = {
   createTokenParticipant,
   createRefreshJWT,
   isRefreshTokenValid,
+  createImageFromInitials,
 };
